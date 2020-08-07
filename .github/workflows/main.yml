@@ -1,0 +1,292 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the master branch
+on:
+  push:
+    branches: master
+ 
+  schedule:
+    # cron use UTC timezone
+    - cron:  '0 23 * * *'
+      
+  repository_dispatch:
+    types: [testing]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        branch: ['master', '2.0.0']
+        case: ['Harbor', 'DockerHub', 'AliACR', 'Gitlab', 'AwsECR', 'GoogleGCR', 'AzureACR', 'Quay']
+    env:
+      target_version: ${{ matrix.branch }}
+      target_case: ${{ matrix.case }}
+    # The type of runner that the job will run on
+    runs-on:
+#    - self-hosted
+      - ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    - uses: actions/checkout@v2.1.1
+
+    - name: before_install
+      run: |
+        set -x
+        pwd
+        df -h
+        free -m
+        IP=$(hostname -I|cut -d' ' -f 1)
+        echo "::set-env name=IP::$IP"
+        env
+        DOCKER_COMPOSE_VERSION=1.23.0
+        sudo curl -f -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
+        sudo chmod a+x /usr/local/bin/docker-compose
+
+    - name: setup Docker
+      uses: docker-practice/actions-setup-docker@0.0.1
+      with:
+        docker_version: 18.09
+        docker_channel: stable
+
+    - name: setup cert
+      run: |
+        echo IP: $IP
+        sudo mkdir -p /data
+        sudo chmod 777 /data
+        bash generateCerts.sh $IP
+        sudo mkdir -p /etc/docker/certs.d/$IP
+        sudo cp harbor_ca.crt /etc/docker/certs.d/$IP/harbor_ca.crt
+        sudo cp harbor_ca.crt /usr/local/share/ca-certificates/
+        sudo update-ca-certificates
+
+    - name: install harbor
+      run: |
+        set -x
+        ./install-harbor.sh ${target_version}
+        tar xzvf harbor.tgz
+        rm -f harbor.tgz
+        echo $IP
+        cd harbor
+        sed -e "s/hostname: reg.mydomain.com/hostname: $IP/" \
+          -e 's|certificate: .*|certificate: /data/cert/server.crt|' \
+          -e 's|private_key: .*|private_key: /data/cert/server.key|' \
+          harbor.yml.tmpl > harbor.yml
+        cat harbor.yml
+        sudo -E ./install.sh --with-chartmuseum
+
+    - name: check install
+      run: |
+        df -h
+        while ! curl -L -k -f http://127.0.0.1/api/v2.0/systeminfo ; do docker ps;sleep 5; done
+        free -m
+
+    - name: setup test
+      run: |
+        sudo apt install -y python-pip libnss3-tools unzip graphicsmagick
+        sudo pip install robotframework==3.0.4 robotframework-sshlibrary robotframework-httplibrary requests dbbot robotframework-seleniumlibrary==4.4.0 robotframework-selenium2library robotframework-pabot robotframework-JSONLibrary
+        sudo bash -c "wget -Nq http://chromedriver.storage.googleapis.com/2.40/chromedriver_linux64.zip && \
+          unzip chromedriver_linux64.zip && \
+          chmod a+x chromedriver && ls -l && \
+          mv -f chromedriver /usr/local/share/chromedriver && \
+          ln -f -s /usr/local/share/chromedriver /usr/local/bin/chromedriver && \
+          rm -f chromedriver_linux64.zip"
+
+    - name: run test
+      run: |
+          set +e
+          cd ${target_version}
+          cd cases
+          case=${target_case}
+          if [ ! -f $case.robot ]; then echo skip $case.robot; continue; fi
+          repo=$(echo mybusybox-${{ matrix.branch }}-${case} | tr 'A-Z' 'a-z')
+          ../../create-image.sh $repo:${case} || exit 1
+          python -u -m robot.run -v ip:$IP -v repo:${repo} -v tag:${case} -v ecr_ac_id:${{ secrets.AWS_ACCESS_KEY_ID }} -v ecr_ac_key:${{ secrets.AWS_SECRET_ACCESS_KEY }} \
+            -v azure_ac_id:${{ secrets.AZURE_ACCESS_ID }} -v azure_ac_key:${{ secrets.AZURE_ACCESS_KEY }} -v gcr_ac_key:'${{ secrets.GCR_AC_KEY }}' \
+            -v gitlab_id:'${{ secrets.GITLAB_ID }}' -v gitlab_key:'${{ secrets.GITLAB_KEY }}' -v ali_ac_id:'${{ secrets.ALI_AC_ID }}' -v ali_ac_key:'${{ secrets.ALI_AC_KEY }}' \
+            -v harbor_ac_id:'${{ secrets.HARBOR_AC_ID }}' -v harbor_ac_key:'${{ secrets.HARBOR_AC_KEY }}' -v dockerhub_ac_id:'${{ secrets.DOCKERHUB_AC_ID }}' -v dockerhub_ac_key:'${{ secrets.DOCKERHUB_AC_KEY }}' \
+            $case.robot
+          num=$(grep good checkpoint.txt|wc -l||echo 0)
+          ../../save-status.sh $num st-${target_version}-$case
+          ../../save-record.sh st-${target_version}-$case
+          rm -f checkpoint.txt
+
+    - name: show result
+      run: |
+        grep "" results/st-*.txt || echo no results
+
+    - name: checkout results branch
+      uses: actions/checkout@v2.1.1
+      with:
+        path: temp
+        ref: results
+
+    - name: upload result to github
+      run: |
+        cp -r results temp/
+        cd temp
+        git add results
+        git -c 'user.email="zziming@vmware.com"' -c 'user.name="zziming"' commit -m "update"
+        for n in `seq 10`; do
+          git push && break
+          sleep 1
+          echo retry $n
+          git fetch || exit 1
+          git -c 'user.email="zziming@vmware.com"' -c 'user.name="zziming"' rebase || exit 1
+        done
+
+    - name: collect logs
+      run: |
+        tar czvf ${target_case}.tgz results/* ${target_version}/cases/{*.xml,*.html} /var/log/harbor/* || true
+        tar tzvf ${target_case}.tgz
+
+    - name: setup gcloud
+      uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+      with:
+        version: '290.0.1'
+        project_id: ${{ secrets.GCP_PROJECT_ID }}
+        service_account_key: ${{ secrets.GCP_SA_KEY }}
+        export_default_credentials: true
+    - run: gcloud info
+
+    - name: upload result to gs
+      run: |
+        gsutil cp ${target_case}.tgz gs://harbor-testing/${target_version}/$(date +"%Y%m")/${{ github.sha }}/
+
+  testold:
+    strategy:
+      fail-fast: false
+      matrix:
+        branch: ['1.10.0', '1.9.0']
+    env:
+      target_version: ${{ matrix.branch }}
+    # The type of runner that the job will run on
+    runs-on:
+      #    - self-hosted
+      - ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      - uses: actions/checkout@v2.1.1
+
+      - name: before_install
+        run: |
+          set -x
+          pwd
+          df -h
+          free -m
+          IP=$(hostname -I|cut -d' ' -f 1)
+          echo "::set-env name=IP::$IP"
+          env
+          DOCKER_COMPOSE_VERSION=1.23.0
+          sudo curl -f -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
+          sudo chmod a+x /usr/local/bin/docker-compose
+
+      - name: setup Docker
+        uses: docker-practice/actions-setup-docker@0.0.1
+        with:
+          docker_version: 18.09
+          docker_channel: stable
+
+      - name: setup cert
+        run: |
+          echo IP: $IP
+          sudo mkdir -p /data
+          sudo chmod 777 /data
+          bash generateCerts.sh $IP
+          sudo mkdir -p /etc/docker/certs.d/$IP
+          sudo cp harbor_ca.crt /etc/docker/certs.d/$IP/harbor_ca.crt
+          sudo cp harbor_ca.crt /usr/local/share/ca-certificates/
+          sudo update-ca-certificates
+
+      - name: install harbor
+        run: |
+          set -x
+          ./install-harbor.sh ${target_version}
+          tar xzvf harbor.tgz
+          rm -f harbor.tgz
+          echo $IP
+          cd harbor
+          sed -i -e "s/hostname: reg.mydomain.com/hostname: $IP/" \
+            -e 's|certificate: .*|certificate: /data/cert/server.crt|' \
+            -e 's|private_key: .*|private_key: /data/cert/server.key|' \
+            harbor.yml
+          cat harbor.yml
+          sudo -E ./install.sh --with-chartmuseum
+
+      - name: check install
+        run: |
+          df -h
+          while ! curl -L -k -f http://127.0.0.1/api/systeminfo ; do docker ps;sleep 5; done
+          free -m
+
+      - name: setup test
+        run: |
+          sudo apt install -y python-pip libnss3-tools unzip graphicsmagick
+          sudo pip install robotframework==3.0.4 robotframework-sshlibrary robotframework-httplibrary requests dbbot robotframework-seleniumlibrary==4.4.0 robotframework-selenium2library robotframework-pabot robotframework-JSONLibrary
+          sudo bash -c "wget -Nq http://chromedriver.storage.googleapis.com/2.40/chromedriver_linux64.zip && \
+            unzip chromedriver_linux64.zip && \
+            chmod a+x chromedriver && ls -l && \
+            mv -f chromedriver /usr/local/share/chromedriver && \
+            ln -f -s /usr/local/share/chromedriver /usr/local/bin/chromedriver && \
+            rm -f chromedriver_linux64.zip"
+
+      - name: run test
+        run: |
+          set +e
+          cd ${target_version}
+          cd cases
+          for case in DockerHub AwsECR GoogleGCR; do
+            if [ ! -f $case.robot ]; then echo skip $case.robot; continue; fi
+            python -u -m robot.run -v ip:$IP -v ecr_ac_id:${{ secrets.AWS_ACCESS_KEY_ID }} -v ecr_ac_key:${{ secrets.AWS_SECRET_ACCESS_KEY }} -v gcr_ac_key:'${{ secrets.GCR_AC_KEY }}' $case.robot
+            if [ "$?" == "0" ];then num=4;else num=0;fi
+            ../../save-status.sh $num st-${target_version}-$case
+            ../../save-record.sh st-${target_version}-$case
+          done
+
+      - name: show result
+        run: |
+          grep "" results/st-*.txt || echo no results
+
+      - name: checkout results branch
+        uses: actions/checkout@v2.1.1
+        with:
+          path: temp
+          ref: results
+
+      - name: upload result to github
+        run: |
+          cp -r results temp/
+          cd temp
+          git add results
+          git -c 'user.email="zziming@vmware.com"' -c 'user.name="zziming"' commit -m "update"
+          for n in `seq 10`; do
+          git push && break
+          sleep 1
+          echo retry $n
+          git fetch || exit 1
+          git -c 'user.email="zziming@vmware.com"' -c 'user.name="zziming"' rebase || exit 1
+          done
+
+      - name: collect logs
+        run: |
+          tar czvf ${{ github.sha }}.tgz results/* ${target_version}/cases/{*.xml,*.html} /var/log/harbor/* || true
+          tar tzvf ${{ github.sha }}.tgz
+
+      - name: setup gcloud
+        uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+        with:
+          version: '290.0.1'
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          export_default_credentials: true
+      - run: gcloud info
+
+      - name: upload result to gs
+        run: |
+          gsutil cp ${{ github.sha }}.tgz gs://harbor-testing/${target_version}/$(date +"%Y%m")/
