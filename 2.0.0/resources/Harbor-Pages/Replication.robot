@@ -74,7 +74,7 @@ Create A New Endpoint
 
 Create A Rule With Existing Endpoint
     [Arguments]    ${name}    ${replication_mode}    ${project_name}    ${resource_type}    ${endpoint}    ${dest_namespace}
-    ...    ${mode}=Manual  ${cron}="* */59 * * * *"  ${del_remote}=${false}
+    ...    ${mode}=Manual  ${cron}="* */59 * * * *"  ${del_remote}=${false}  ${filter_tag}=${false}
     #click new
     Retry Element Click    ${new_name_xpath}
     #input name
@@ -84,6 +84,7 @@ Create A Rule With Existing Endpoint
 
     #set filter
     Retry Text Input    ${source_project}    ${project_name}
+    Run Keyword If  '${filter_tag}' != '${false}'  Retry Text Input    ${filter_tag_id}    ${filter_tag}
     Run Keyword And Ignore Error    Select From List By Value    ${rule_resource_selector}    ${resource_type}
     Retry Text Input    ${dest_namespace_xpath}    ${dest_namespace}
     #set trigger

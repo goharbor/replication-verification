@@ -64,9 +64,9 @@ Test Replication Of Push Images By Event
     Log To Console  Create push-based rule
     Create A Rule With Existing Endpoint    rule${d}_0    push    project${d}_0/*    image    e${d}    ${target_namespace}  mode=Event Based  del_remote=${true}
     Log To Console  Create pull-based rule
-    Create A Rule With Existing Endpoint    rule${d}_1    pull    ${target_namespace}/${target_repo}    image    e${d}    project${d}_1
+    Create A Rule With Existing Endpoint    rule${d}_1    pull    ${target_namespace}/${target_repo}    image    e${d}    project${d}_1    filter_tag=${target_tag}_${d}
     Log To Console  Pushing Image
-    ${image_with_tag}=  Push Image  ${ip}  ${HARBOR_ADMIN}  ${HARBOR_PASSWORD}  project${d}_0  ${target_repo}:${target_tag}  need_pull_first=${false}  tag_suffix=${true}
+    ${image_with_tag}=  Push Image With Tag  ${ip}  ${HARBOR_ADMIN}  ${HARBOR_PASSWORD}  project${d}_0  ${target_repo}  ${target_tag}_${d}  ${target_tag}
     Log To Console  Push Image ${image_with_tag}
     Sleep  30
     Log To Console  Check push-based rule
