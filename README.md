@@ -52,17 +52,14 @@ curl -u goharbor -XPOST https://api.github.com/repos/goharbor/replication-verifi
 
 ### run locally
 
-Use local script to run.
+Use local script to run. (Ubuntu 18.04 is tested.)
 
 Clone this repository first:
 
-```shell script
-git clone https://github.com/goharbor/replication-verification.git
-```
 Execute the script with proper parameters:
 
 ```shell script
-./localrun.sh --
+./localrun.sh <case name> <harbor IP> <registry_id:xxx> <registry_key:xxx> [true to show browser]
 ```
 
 ## Contribute new replication adapter
