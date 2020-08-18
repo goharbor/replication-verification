@@ -57,9 +57,15 @@ Test Case - Replication Of Push Images to AWS-ECR Triggered By Event
 The first time run localrun.sh, it will install the dependency software for ubuntu 18.04. If you are using other OS, please install them manually.
 The purpose of this step is to make sure both the code and testing cases are correctly implemented.
 
+6. Run below script in current case folder to general a gif record named record.gif in results folder
+
+```shell script
+../../save-record.sh
+```
+
 ## 3. Post actions
 
-1. Attach the gif picture generated at the step 4 of section 2 to the adapter code PR mentioned at step 4 of section 1
+1. Attach the gif record generated at the step 4 of section 2 to the adapter code PR mentioned at step 4 of section 1
 as a proof of the PR.
 2. Provide the AK info that we can add to the github Secrets.
 3. Change .github/workflows/main.yml#112 and your case to using the AK in secrets.

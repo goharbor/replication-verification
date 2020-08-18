@@ -113,7 +113,9 @@ jobs:
             $case.robot
           num=$(grep good checkpoint.txt|wc -l||echo 0)
           ../../save-status.sh $num st-${target_version}-$case
-          ../../save-record.sh st-${target_version}-$case
+          if [ "$num" == "4" ];then cp ../../good.gif ../../results/st-${target_version}-${case}.gif;else
+          ../../save-record.sh st-${target_version}-${case}
+          fi
           rm -f checkpoint.txt
 
     - name: show result
@@ -246,7 +248,9 @@ jobs:
             python -u -m robot.run -v ip:$IP -v ecr_ac_id:${{ secrets.AWS_ACCESS_KEY_ID }} -v ecr_ac_key:${{ secrets.AWS_SECRET_ACCESS_KEY }} -v gcr_ac_key:'${{ secrets.GCR_AC_KEY }}' $case.robot
             if [ "$?" == "0" ];then num=4;else num=0;fi
             ../../save-status.sh $num st-${target_version}-$case
-            ../../save-record.sh st-${target_version}-$case
+            if [ "$num" == "4" ];then cp ../../good.gif ../../results/st-${target_version}-${case}.gif;else
+            ../../save-record.sh st-${target_version}-${case}
+            fi
           done
 
       - name: show result
