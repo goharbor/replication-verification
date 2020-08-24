@@ -6,7 +6,7 @@ if [ "$?" != "251" ] || [ "$?" == "127" ]; then
   sleep 1
   set -xe
   sudo apt install -y chromium-browser python-pip libnss3-tools unzip graphicsmagick
-  sudo pip install robotframework==3.0.4 robotframework-sshlibrary robotframework-httplibrary requests dbbot robotframework-seleniumlibrary==4.4.0 robotframework-selenium2library robotframework-pabot robotframework-JSONLibrary
+  sudo pip install -r requirements.txt
   sudo bash -c "wget -Nq http://chromedriver.storage.googleapis.com/2.40/chromedriver_linux64.zip && \
     unzip chromedriver_linux64.zip && \
     chmod a+x chromedriver && ls -l && \
