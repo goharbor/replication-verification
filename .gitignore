@@ -1,1 +1,11 @@
+.DS_Store
 .idea
+.vscode
+Pipfile
+venv*
+.venv*
+**/cases/log.html
+**/cases/output.xml
+**/cases/report.html
+**/cases/*.png
+**/cases/*.txt
