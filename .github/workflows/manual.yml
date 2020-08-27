@@ -1,8 +1,8 @@
 # This is used to trigger a replication testing based on some github commit.
-# The param ref is the full commit id or PR ref(refs/pull/12878/merge), version is the case folder (master/2.0.0/1.10.0), optional cases are separated by space.
-#  curl -u username:password -X POST https://api.github.com/repos/goharbor/replication-verification/dispatches -d '
+# The param ref is the full commit id, version is the case folder (master/2.0.0/1.10.0), optional cases are separated by space.
+#  curl -u username:password -XPOST https://api.github.com/repos/bitsf/replication-check/dispatches -d '
 #  {
-#    "event_type": "testit","client_payload": {"ref":"refs/pull/12878/merge","version":"2.0.0","cases":"GoogleGCR DockerHub"}
+#    "event_type": "testit","client_payload": {"ref":"15a5ee705aaeac24e07c4f6f57d2ff4465a766a2","version":"2.0.0","cases":"GoogleGCR DockerHub"}
 #  }'
 
 name: CI
@@ -54,12 +54,15 @@ jobs:
             cases="Harbor DockerHub AliACR Gitlab AwsECR GoogleGCR AzureACR Quay"
           fi
 
+<<<<<<< HEAD
       - name: checkout harbor ${{ github.event.client_payload.ref }}
         uses: actions/checkout@v2
         with:
           repository: 'goharbor/harbor'
           ref: ${{ github.event.client_payload.ref }}
           path: src/github.com/goharbor/harbor
+=======
+>>>>>>> add manual.yml
       - name: Set up Go 1.13
         uses: actions/setup-go@v1
         with:
@@ -70,6 +73,14 @@ jobs:
         with:
           docker_version: 18.09
           docker_channel: stable
+<<<<<<< HEAD
+=======
+      - uses: actions/checkout@v2
+        with:
+          repository: 'goharbor/harbor'
+          ref: ${{ github.event.client_payload.ref }}
+          path: src/github.com/goharbor/harbor
+>>>>>>> add manual.yml
       - name: setup env
         run: |
           cd src/github.com/goharbor/harbor
@@ -136,7 +147,11 @@ jobs:
             if [ ! -f $case.robot ]; then echo skip $case.robot; continue; fi
             repo=$(echo mybusybox-${target_version}-${case} | tr 'A-Z' 'a-z')
             ../../create-image.sh $repo:${case} || exit 1
+<<<<<<< HEAD
             python -u -m robot.run -X -v ip:$IP -v repo:${repo} -v tag:${case} -v ecr_ac_id:${{ secrets.AWS_ACCESS_KEY_ID }} -v ecr_ac_key:${{ secrets.AWS_SECRET_ACCESS_KEY }} \
+=======
+            python -u -m robot.run -v ip:$IP -v repo:${repo} -v tag:${case} -v ecr_ac_id:${{ secrets.AWS_ACCESS_KEY_ID }} -v ecr_ac_key:${{ secrets.AWS_SECRET_ACCESS_KEY }} \
+>>>>>>> add manual.yml
               -v azure_ac_id:${{ secrets.AZURE_ACCESS_ID }} -v azure_ac_key:${{ secrets.AZURE_ACCESS_KEY }} -v gcr_ac_key:'${{ secrets.GCR_AC_KEY }}' -v quay_ac_key:'${{ secrets.QUAY_AC_KEY }}'\
               -v gitlab_id:'${{ secrets.GITLAB_ID }}' -v gitlab_key:'${{ secrets.GITLAB_KEY }}' -v ali_ac_id:'${{ secrets.ALI_AC_ID }}' -v ali_ac_key:'${{ secrets.ALI_AC_KEY }}' \
               -v harbor_ac_id:'${{ secrets.HARBOR_AC_ID }}' -v harbor_ac_key:'${{ secrets.HARBOR_AC_KEY }}' -v dockerhub_ac_id:'${{ secrets.DOCKERHUB_AC_ID }}' -v dockerhub_ac_key:'${{ secrets.DOCKERHUB_AC_KEY }}' \
