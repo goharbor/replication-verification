@@ -21,7 +21,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        branch: ['master', '2.0.0']
+        branch: ['master', '2.1.0', '2.0.0']
         case: ['Harbor', 'DockerHub', 'AliACR', 'Gitlab', 'AwsECR', 'GoogleGCR', 'AzureACR', 'Quay']
     env:
       target_version: ${{ matrix.branch }}
@@ -164,7 +164,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        branch: ['1.10.0', '1.9.0']
+        branch: ['1.10.0']
     env:
       target_version: ${{ matrix.branch }}
     # The type of runner that the job will run on
