@@ -103,7 +103,7 @@ jobs:
           cd ${target_version}
           cd cases
           case=${target_case}
-          if [ ! -f $case.robot ]; then echo skip $case.robot; continue; fi
+          if [ ! -f $case.robot ]; then echo skip $case.robot; exit /b 0; fi
           repo=$(echo mybusybox-${{ matrix.branch }}-${case} | tr 'A-Z' 'a-z')
           ../../create-image.sh $repo:${case} || exit 1
           python -u -m robot.run -X -v ip:$IP -v repo:${repo} -v tag:${case} -v ecr_ac_id:${{ secrets.AWS_ACCESS_KEY_ID }} -v ecr_ac_key:${{ secrets.AWS_SECRET_ACCESS_KEY }} \
@@ -144,7 +144,7 @@ jobs:
 
     - name: collect logs
       run: |
-        tar czvf ${target_case}.tgz results/* ${target_version}/cases/{*.xml,*.html} /var/log/harbor/* || true
+        tar czvf ${target_case}.tgz results ${target_version}/cases/{*.xml,*.html} /var/log/harbor /data/job_logs || true
         tar tzvf ${target_case}.tgz
 
     - name: setup gcloud
@@ -279,7 +279,7 @@ jobs:
 
       - name: collect logs
         run: |
-          tar czvf ${{ github.sha }}.tgz results/* ${target_version}/cases/{*.xml,*.html} /var/log/harbor/* || true
+          tar czvf ${{ github.sha }}.tgz results ${target_version}/cases/{*.xml,*.html} /var/log/harbor /data/job_logs || true
           tar tzvf ${{ github.sha }}.tgz
 
       - name: setup gcloud
