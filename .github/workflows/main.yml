@@ -10,7 +10,7 @@ on:
  
   schedule:
     # cron use UTC timezone
-    - cron:  '0 23 * * *'
+    - cron:  '0 23 1 * *'
       
   repository_dispatch:
     types: [testing]
