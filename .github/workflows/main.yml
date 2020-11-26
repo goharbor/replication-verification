@@ -42,7 +42,7 @@ jobs:
         df -h
         free -m
         IP=$(hostname -I|cut -d' ' -f 1)
-        echo "::set-env name=IP::$IP"
+        echo "IP=$IP" >> $GITHUB_ENV
         env
         DOCKER_COMPOSE_VERSION=1.23.0
         sudo curl -f -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
@@ -183,7 +183,7 @@ jobs:
           df -h
           free -m
           IP=$(hostname -I|cut -d' ' -f 1)
-          echo "::set-env name=IP::$IP"
+          echo "IP=$IP" >> $GITHUB_ENV
           env
           DOCKER_COMPOSE_VERSION=1.23.0
           sudo curl -f -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose

@@ -164,7 +164,7 @@ Filter Rule
 
 Select Rule
     [Arguments]  ${rule}
-    Retry Element Click  //clr-dg-row[contains(.,'${rule}')]//label
+    Retry Double Keywords When Error  Retry Element Click  //clr-dg-row[contains(.,'${rule}')]/div//div[contains(@class,'datagrid-select')]  Retry Wait Element  ${replication_exec_id}
 
 Stop Jobs
     Retry Element Click  ${stop_jobs_button}
@@ -227,7 +227,7 @@ Delete Endpoint
 
 Select Rule And Replicate
     [Arguments]  ${rule_name}
-    Retry Double Keywords When Error  Retry Element Click  //hbr-list-replication-rule//clr-dg-cell[contains(.,'${rule_name}')]  Wait Until Element Is Visible And Enabled  ${replication_exec_id}
+    Select Rule  ${rule_name}
     Retry Element Click    ${replication_exec_id}
     Retry Double Keywords When Error    Retry Element Click    xpath=${dialog_replicate}    Retry Wait Until Page Not Contains Element    xpath=${dialog_replicate}
 
