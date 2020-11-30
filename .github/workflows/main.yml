@@ -133,13 +133,13 @@ jobs:
         cp -r results temp/
         cd temp
         git add results
-        git -c 'user.email="zziming@vmware.com"' -c 'user.name="zziming"' commit -m "update"
+        git -c 'user.email="zziming-ghbot@vmware.com"' -c 'user.name="zziming-ghbot"' commit -m "update"
         for n in `seq 10`; do
           git push && break
           sleep 1
           echo retry $n
           git fetch || exit 1
-          git -c 'user.email="zziming@vmware.com"' -c 'user.name="zziming"' rebase || exit 1
+          git -c 'user.email="zziming-ghbot@vmware.com"' -c 'user.name="zziming-ghbot"' rebase || exit 1
         done
 
     - name: collect logs
@@ -268,13 +268,13 @@ jobs:
           cp -r results temp/
           cd temp
           git add results
-          git -c 'user.email="zziming@vmware.com"' -c 'user.name="zziming"' commit -m "update"
+          git -c 'user.email="zziming-ghbot@vmware.com"' -c 'user.name="zziming-ghbot"' commit -m "update"
           for n in `seq 10`; do
-          git push && break
-          sleep 1
-          echo retry $n
-          git fetch || exit 1
-          git -c 'user.email="zziming@vmware.com"' -c 'user.name="zziming"' rebase || exit 1
+            git push && break
+            sleep 1
+            echo retry $n
+            git fetch || exit 1
+            git -c 'user.email="zziming-ghbot@vmware.com"' -c 'user.name="zziming-ghbot"' rebase || exit 1
           done
 
       - name: collect logs
