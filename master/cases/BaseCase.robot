@@ -17,7 +17,7 @@ Documentation  This resource contains keywords related to creating basic test ca
 Resource  ../resources/Util.robot
 
 *** Variables ***
-${HARBOR_URL}  https://${ip}
+${HARBOR_URL}  http://${ip}
 ${HARBOR_ADMIN}  admin
 ${HARBOR_PASSWORD}  Harbor12345
 ${SERVER}  ${ip}

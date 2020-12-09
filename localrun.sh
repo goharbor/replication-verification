@@ -18,7 +18,7 @@ fi
 
 if [ "$4" == "" ];then echo 'localrun.sh <case name> <harbor IP> <registry_id:xxx> <registry_key:xxx> [true to show browser]' ; exit 1;fi
 if [ ! -f master/cases/$1.robot ];then echo "can not find case master/cases/$1"; fi
-if ! curl -L -k -f https://$2/api/v2.0/systeminfo ;then echo Harbor $2 is not ready; fi
+if ! curl -L -k -f http://$2/api/v2.0/systeminfo ;then echo Harbor $2 is not ready; fi
 sudo mkdir -p /etc/docker/certs.d/$2/
 openssl s_client -connect $2 -showcerts < /dev/null 2>/dev/null |openssl x509 -outform PEM | sudo tee /etc/docker/certs.d/$2/ca.crt
 cd master/cases
