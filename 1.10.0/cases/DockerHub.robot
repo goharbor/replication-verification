@@ -40,9 +40,9 @@ Test Case - Replication Of Pull Images from DockerHub To Self
     Sign In Harbor    ${HARBOR_URL}    ${HARBOR_ADMIN}    ${HARBOR_PASSWORD}
     Create An New Project    project${d}
     Switch To Registries
-    Create A New Endpoint    docker-hub    e${d}    https://hub.docker.com/    danfengliu    Aa123456    Y
+    Create A New Endpoint    docker-hub    e${d}    https://hub.docker.com/    ${dockerhub_ac_id}    ${dockerhub_ac_key}    Y
     Switch To Replication Manage
-    Create A Rule With Existing Endpoint    rule${d}    pull    danfengliu/*    image    e${d}    project${d}
+    Create A Rule With Existing Endpoint    rule${d}    pull    danfengliu/{cent*,mariadb}    image    e${d}    project${d}
     Select Rule And Replicate  rule${d}
     #In docker-hub, under repository danfengliu, there're only 2 images: centos,mariadb.
     Image Should Be Replicated To Project  project${d}  centos
