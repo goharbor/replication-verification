@@ -10,7 +10,7 @@ on:
  
   schedule:
     # cron use UTC timezone
-    - cron:  '0 23 1 * *'
+    - cron:  '0 23 * * *'
       
   repository_dispatch:
     types: [testing]
@@ -149,7 +149,7 @@ jobs:
         tar tzvf ${target_case}.tgz
 
     - name: setup gcloud
-      uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+      uses: google-github-actions/setup-gcloud@v0.2.0
       with:
         version: '290.0.1'
         project_id: ${{ secrets.GCP_PROJECT_ID }}
@@ -284,7 +284,7 @@ jobs:
           tar tzvf ${{ github.sha }}.tgz
 
       - name: setup gcloud
-        uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+        uses: google-github-actions/setup-gcloud@v0.2.0
         with:
           version: '290.0.1'
           project_id: ${{ secrets.GCP_PROJECT_ID }}
