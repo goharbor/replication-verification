@@ -51,7 +51,7 @@ jobs:
               echo $case
             done
           else
-            cases="Harbor DockerHub AliACR Gitlab AwsECR GoogleGCR AzureACR Quay TencentTCR"
+            cases="Harbor DockerHub AliACR Gitlab AwsECR GoogleGCR AzureACR Quay TencentTCR GithubGCR"
           fi
 
       - name: checkout harbor ${{ github.event.client_payload.ref }}
@@ -129,7 +129,7 @@ jobs:
           cd cases
           cases="${{ github.event.client_payload.cases }}"
           if [ "$cases" = "" ]; then
-            cases="Harbor DockerHub AliACR Gitlab AwsECR GoogleGCR AzureACR Quay TencentTCR"
+            cases="Harbor DockerHub AliACR Gitlab AwsECR GoogleGCR AzureACR Quay TencentTCR GithubGCR"
           fi
           for case in $cases;do
             echo $case
