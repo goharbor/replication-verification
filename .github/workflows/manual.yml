@@ -51,7 +51,7 @@ jobs:
               echo $case
             done
           else
-            cases="Harbor DockerHub AliACR Gitlab AwsECR GoogleGCR AzureACR Quay TencentTCR GithubGCR"
+            cases="Harbor DockerHub AliACR Gitlab AwsECR GoogleGCR AzureACR Quay TencentTCR GithubGHCR"
           fi
 
       - name: checkout harbor ${{ github.event.client_payload.ref }}
@@ -129,7 +129,7 @@ jobs:
           cd cases
           cases="${{ github.event.client_payload.cases }}"
           if [ "$cases" = "" ]; then
-            cases="Harbor DockerHub AliACR Gitlab AwsECR GoogleGCR AzureACR Quay TencentTCR GithubGCR"
+            cases="Harbor DockerHub AliACR Gitlab AwsECR GoogleGCR AzureACR Quay TencentTCR GithubGHCR"
           fi
           for case in $cases;do
             echo $case
@@ -140,6 +140,8 @@ jobs:
               -v azure_ac_id:${{ secrets.AZURE_ACCESS_ID }} -v azure_ac_key:${{ secrets.AZURE_ACCESS_KEY }} -v gcr_ac_key:'${{ secrets.GCR_AC_KEY }}' -v quay_ac_key:'${{ secrets.QUAY_AC_KEY }}'\
               -v gitlab_id:'${{ secrets.GITLAB_ID }}' -v gitlab_key:'${{ secrets.GITLAB_KEY }}' -v ali_ac_id:'${{ secrets.ALI_AC_ID }}' -v ali_ac_key:'${{ secrets.ALI_AC_KEY }}' \
               -v harbor_ac_id:'${{ secrets.HARBOR_AC_ID }}' -v harbor_ac_key:'${{ secrets.HARBOR_AC_KEY }}' -v dockerhub_ac_id:'${{ secrets.DOCKERHUB_AC_ID }}' -v dockerhub_ac_key:'${{ secrets.DOCKERHUB_AC_KEY }}' \
+              -v tencent_tcr_id:'${{ secrets.TENCENT_TCR_ID }}' -v tencent_tcr_key:'${{ secrets.TENCENT_TCR_KEY }}' \
+              -v github_ghcr_id:'${{ secrets.GHCR_GITHUB_ID }}' -v github_ghcr_key:'${{ secrets.GHCR_GITHUB_KEY }}' \
               $case.robot
             num=$(grep good checkpoint.txt|wc -l||echo 0)
             ../../save-status.sh $num st-${target_version}-$case

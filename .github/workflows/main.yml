@@ -22,7 +22,7 @@ jobs:
       fail-fast: false
       matrix:
         branch: ['master', '2.1.0', '2.0.0']
-        case: ['Harbor', 'DockerHub', 'AliACR', 'Gitlab', 'AwsECR', 'GoogleGCR', 'AzureACR', 'Quay', 'TencentTCR', 'GithubGCR']
+        case: ['Harbor', 'DockerHub', 'AliACR', 'Gitlab', 'AwsECR', 'GoogleGCR', 'AzureACR', 'Quay', 'TencentTCR', 'GithubGHCR']
     env:
       target_version: ${{ matrix.branch }}
       target_case: ${{ matrix.case }}
@@ -111,7 +111,7 @@ jobs:
             -v gitlab_id:'${{ secrets.GITLAB_ID }}' -v gitlab_key:'${{ secrets.GITLAB_KEY }}' -v ali_ac_id:'${{ secrets.ALI_AC_ID }}' -v ali_ac_key:'${{ secrets.ALI_AC_KEY }}' \
             -v harbor_ac_id:'${{ secrets.HARBOR_AC_ID }}' -v harbor_ac_key:'${{ secrets.HARBOR_AC_KEY }}' -v dockerhub_ac_id:'${{ secrets.DOCKERHUB_AC_ID }}' -v dockerhub_ac_key:'${{ secrets.DOCKERHUB_AC_KEY }}' \
             -v tencent_tcr_id:'${{ secrets.TENCENT_TCR_ID }}' -v tencent_tcr_key:'${{ secrets.TENCENT_TCR_KEY }}' \
-            -v github_gcr_id:'${{ secrets. GCR_GITHUB_ID }}' -v github_gcr_key:'${{ secrets. GCR_GITHUB_KEY }}' \
+            -v github_ghcr_id:'${{ secrets.GHCR_GITHUB_ID }}' -v github_ghcr_key:'${{ secrets.GHCR_GITHUB_KEY }}' \
             $case.robot
           num=$(grep good checkpoint.txt|wc -l||echo 0)
           ../../save-status.sh $num st-${target_version}-$case
