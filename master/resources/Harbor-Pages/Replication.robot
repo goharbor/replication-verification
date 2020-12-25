@@ -62,7 +62,7 @@ Create A New Endpoint
     #input necessary info
     Select From List By Value  ${provider_selector}  ${provider}
     Retry Text Input  xpath=${destination_name_xpath}    ${name}
-    Run Keyword If  '${provider}' != 'aws-ecr' and '${provider}' != 'google-gcr' and '${provider}' != 'docker-hub' and '${provider}' != 'helm-hub'   Run keyword  Retry Text Input  xpath=${destination_url_xpath}  ${url}
+    Run Keyword If  '${provider}' != 'aws-ecr' and '${provider}' != 'google-gcr' and '${provider}' != 'docker-hub' and '${provider}' != 'helm-hub' and '${provider}' != 'github-ghcr'   Run keyword  Retry Text Input  xpath=${destination_url_xpath}  ${url}
     Run Keyword If  '${provider}' == 'aws-ecr' or '${provider}' == 'google-gcr'   Run keyword  Select Destination URL  ${url}
     Run Keyword If  '${provider}' != 'google-gcr'   Retry Text Input  xpath=${destination_username_xpath}  ${username}
     Retry Text Input  xpath=${destination_password_xpath}  ${pwd}
