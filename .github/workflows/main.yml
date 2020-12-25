@@ -146,7 +146,7 @@ jobs:
 
     - name: collect logs
       run: |
-        tar czvf ${target_case}.tgz results ${target_version}/cases/{*.xml,*.html} /var/log/harbor /data/job_logs || true
+        sudo tar czvf ${target_case}.tgz results ${target_version}/cases/{*.xml,*.html} /var/log/harbor /data/job_logs || true
         tar tzvf ${target_case}.tgz
 
     - name: setup gcloud
