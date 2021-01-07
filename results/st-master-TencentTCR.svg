@@ -1,11 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="40" height="20">
-    <!--bad-->
+    <!--good-->
     <g>
         <rect width="10" height="10" style="fill:#48FF2C;stroke-width:0.4;stroke:rgb(255,255,255)" x="0"/>
         <rect width="10" height="10" style="fill:#48FF2C;stroke-width:0.4;stroke:rgb(255,255,255)" x="10"/>
-        <rect width="10" height="10" style="fill:#FF0000;stroke-width:0.4;stroke:rgb(255,255,255)" x="20"/>
-        <rect width="10" height="10" style="fill:#FF0000;stroke-width:0.4;stroke:rgb(255,255,255)" x="30"/>
+        <rect width="10" height="10" style="fill:#48FF2C;stroke-width:0.4;stroke:rgb(255,255,255)" x="20"/>
+        <rect width="10" height="10" style="fill:#48FF2C;stroke-width:0.4;stroke:rgb(255,255,255)" x="30"/>
 
-        <text x="0" y="18" fill="black" font-size="8">01062328</text>
+        <text x="0" y="18" fill="black" font-size="8">01072331</text>
     </g>
 </svg>
